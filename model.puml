@@ -1,27 +1,49 @@
 @startuml
-'https://plantuml.com/class-diagram
+' ---- Layout & Stil ----
+hide empty methods
+ 
+' ---- Legende ----
+legend right
+<<RichType>>: Stark typisierte Primitive
+<<ValueObject>>: Value Objects
+<<entity>>: Persistente Entität
+<<unique>>: Eindeutige Einschränkung auf Spaltenebene
+<<nn>>: Not null
+endlegend
+ 
+' ===================== Packages =====================
 
-abstract class AbstractList
-abstract AbstractCollection
-interface List
-interface Collection
-
-List <|-- AbstractList
-Collection <|-- AbstractCollection
-
-Collection <|- List
-AbstractCollection <|- AbstractList
-AbstractList <|-- ArrayList
-
-class ArrayList {
-Object[] elementData
-size()
+package "Shared\n(Value Objects)" as P_Shared #EEF6FF {
+ 
+  class Phone << (R,#FFEECC) RichType >> {
+    +Value: string <<nn>>
+  }
 }
 
-enum TimeUnit {
-DAYS
-HOURS
-MINUTES
+class User {}
+
+class Customer {}
+
+class RestaurantOwner {}
+
+class Order {
+ Customer: Customer <<nn>>
 }
+
+class OrderItem {}
+
+class Restaurant {}
+
+class MenuItem {}
+
+
+'Beziehungen
+
+
+' ===================== Beziehungen =====================
+
+Customer "1" <-- "*" Order
+
+
 
 @enduml
