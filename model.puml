@@ -127,19 +127,19 @@ class CartItem {
 RegisterCustomer --|> Customer
 AnonymousCustomer --|> Customer
 
-Order "*" -- "1" RegisterCustomer
-Order "*" -- "1" Restaurant
-Order "1" -- "*" OrderItem
+Order "*" --> "1" RegisterCustomer
+Order "*" --> "1" Restaurant
+Order "1" <-- "*" OrderItem
 
-OrderItem "*" -- "1" MenuItem
+OrderItem "*" --> "1" MenuItem
 
-Restaurant "1" -- "*" MenuItem
-Restaurant "*" -- "1" RestaurantOwner
+Restaurant "1" <-- "*" MenuItem
+Restaurant "*" --> "1" RestaurantOwner
 
-Cart "1" -- "1" Customer
-Cart "*" -- "1" Restaurant
-Cart "1" -- "*" CartItem
+Cart "0..1" -- "1" Customer
+Cart "*" --> "1" Restaurant
+Cart "1" <-- "*" CartItem
 
-CartItem "*" -- "1" MenuItem
+CartItem "*" --> "1" MenuItem
 
 @enduml
