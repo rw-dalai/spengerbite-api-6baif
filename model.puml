@@ -62,10 +62,13 @@ package "Customers" as P_Customers #FFF5E6 {
     }
 }
 
-
-
 class RestaurantOwner {
   Role: UserRole <<nn>>
+  CompanyName: string <<nn>>
+  CompanyAdress: Address <<nn>>
+  FirstName: string <<nn>>
+  LastName: string <<nn>>
+  Email : Email <<nn>>
 }
 
 enum OrderStatus {
@@ -77,7 +80,7 @@ enum OrderStatus {
 }
 
 class Order {
-  Customer: Customer <<nn>>
+  Customer: RegisterCustomer <<nn>>
   Restaurant: Restaurant <<nn>>
   OrderedAt: DateTime <<nn>>
   OrderState: OrderState <<nn>>
