@@ -24,17 +24,52 @@ class User {}
 
 class Customer {}
 
-class RestaurantOwner {}
-
-class Order {
- Customer: Customer <<nn>>
+enum OrderStatus {
+  SUBMITTED
+  CONFIRMED
+  PREPARING
+  DELIVERED
+  CANCELLED
 }
 
-class OrderItem {}
+class Order {
+  Customer: Customer <<nn>>
+  Restaurant: Restaurant <<nn>>
+  OrderedAt: DateTime <<nn>>
+  OrderState: OrderState <<nn>>
+}
 
-class Restaurant {}
+class OrderItem {
+  Order: Order <<nn>>
+  MenuItem: MenuItem <<nn>>
+  Quantity: int <<nn>>
+  Price: decimal <<nn>>
+}
 
-class MenuItem {}
+class RestaurantOwner {}
+
+class Restaurant {
+  Name: string <<nn>>
+  RestaurantOwner: RestaurantOwner <<nn>>
+}
+
+class MenuItem {
+  Restaurant: Restaurant <<nn>>
+  Name: string <<nn>>
+  Price: decimal <<nn>>
+}
+
+class Cart {
+   Customer: Customer <<nn>>
+   Restaurant: Restaurant <<nn>>
+   CartItems: List<CartItem> <<nn>>
+}
+
+class CartItem {
+   Cart: Cart <<nn>>
+   MenuItem: MenuItem <<nn>>
+   Quantity: int <<nn>>
+}
 
 
 'Beziehungen
