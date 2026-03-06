@@ -18,11 +18,55 @@ package "Shared\n(Value Objects)" as P_Shared #EEF6FF {
   class Phone << (R,#FFEECC) RichType >> {
     +Value: string <<nn>>
   }
+  
+  class Email << (R,#FFEECC) RichType >> {
+    +Value: string <<nn>>
+  }
+  
+  class Address << (R,#FFEECC) ValueObject >> {
+    +Street: string <<nn>>
+    +City: string <<nn>>
+    +PostalCode: string <<nn>>
+    +Country: string <<nn>>
+  }
+  
+  class OpeningHours << (V,#CCEEFF) ValueObject >> {
+    +OpenTime: TimeOnly <<nn>>
+    +CloseTime: TimeOnly <<nn>>
+  }
 }
 
-class User {}
+enum UserRole {
+  ADMIN,
+  CUSTOMER
+  RESTAURANT_OWNER
+  GUEST
+}
 
-class Customer {}
+package "Customers" as P_Customers #FFF5E6 {
+
+    abstract class Customer {
+      +Role: UserRole <<nn>>
+    }
+    
+    class RegisterCustomer {
+      +FirstName: string <<nn>>
+      +LastName: string <<nn>>
+      +Email: Email <<nn>>
+      +Phone: Phone
+      +Address: Address <<nn>>
+      '+Addresses: List<Address> <<nn>>
+    }
+    
+    class AnonymousCustomer {
+    }
+}
+
+
+
+class RestaurantOwner {
+  Role: UserRole <<nn>>
+}
 
 enum OrderStatus {
   SUBMITTED
@@ -46,10 +90,10 @@ class OrderItem {
   Price: decimal <<nn>>
 }
 
-class RestaurantOwner {}
-
 class Restaurant {
   Name: string <<nn>>
+  Address: Address <<nn>>
+  OpeningHours: OpeningHours <<nn>>
   RestaurantOwner: RestaurantOwner <<nn>>
 }
 
@@ -77,7 +121,25 @@ class CartItem {
 
 ' ===================== Beziehungen =====================
 
-Customer "1" <-- "*" Order
+RegisterCustomer --|> Customer
+AnonymousCustomer --|> Customer
+
+Order "*" -- "1" Customer
+Order "*" -- "1" Restaurant
+Order "1" -- "*" OrderItem
+
+OrderItem "*" -- "1" MenuItem
+
+Restaurant "1" -- "*" MenuItem
+Restaurant "*" -- "1" RestaurantOwner
+
+Cart "1" -- "1" Customer
+Cart "*" -- "1" Restaurant
+Cart "1" -- "*" CartItem
+
+CartItem "*" -- "1" MenuItem
+
+
 
 
 
