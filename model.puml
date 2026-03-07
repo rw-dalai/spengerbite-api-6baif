@@ -35,6 +35,10 @@ package "Shared\n(Value Objects)" as P_Shared #EEF6FF {
     +OpenTime: TimeOnly <<nn>>
     +CloseTime: TimeOnly <<nn>>
   }
+  
+  class PasswordHash << (R,#FFEECC) RichType >> {
+    +Value: string <<nn>>
+  }
 
   enum UserRole <<Enum>> {
     Admin
@@ -57,7 +61,7 @@ package "Auth" as P_Auth #F3E8FF {
 
   class UserAccount <<entity>> {
     +Email: Email <<nn>>
-    +PasswordHash: string <<nn>>
+    +PasswordHash: PasswordHash <<nn>>
     +Role: UserRole <<nn>>
     +IsEnabled: bool <<nn>>
   }
@@ -76,6 +80,7 @@ package "Customer" as P_Customer #FFF5E6 {
     +Email: Email <<nn>>
     +Phone: Phone
     +Address: Address <<nn>>
+    +Account: UserAccount <<nn>>
   }
 
   class AnonymousCustomer <<entity>> {
@@ -95,6 +100,7 @@ package "Restaurant Owner" as P_RestaurantOwner #E8F8F0 {
     +Email: Email <<nn>>
     +FirstName: string <<nn>>
     +LastName: string <<nn>>
+    +Account: UserAccount <<nn>>
   }
 }
 
