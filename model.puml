@@ -1,145 +1,200 @@
 @startuml
-' ---- Layout & Stil ----
+
+' ===================== Layout & Style =====================
 hide empty methods
- 
-' ---- Legende ----
+skinparam classAttributeIconSize 0
+
 legend right
-<<RichType>>: Stark typisierte Primitive
-<<ValueObject>>: Value Objects
-<<entity>>: Persistente Entität
-<<unique>>: Eindeutige Einschränkung auf Spaltenebene
+<<RichType>>: Strongly typed primitive
+<<ValueObject>>: Value object
+<<entity>>: Persistent entity
+<<Enum>>: Enumeration
 <<nn>>: Not null
 endlegend
- 
-' ===================== Packages =====================
+
+' ===================== Shared =====================
 
 package "Shared\n(Value Objects)" as P_Shared #EEF6FF {
- 
-  class Phone << (R,#FFEECC) RichType >> {
-    +Value: string <<nn>>
-  }
-  
+
   class Email << (R,#FFEECC) RichType >> {
     +Value: string <<nn>>
   }
-  
-  class Address << (R,#FFEECC) ValueObject >> {
+
+  class Phone << (R,#FFEECC) RichType >> {
+    +Value: string <<nn>>
+  }
+
+  class Address << (V,#CCEEFF) ValueObject >> {
     +Street: string <<nn>>
+    +Zip: string <<nn>>
     +City: string <<nn>>
-    +PostalCode: string <<nn>>
     +Country: string <<nn>>
   }
-  
+
   class OpeningHours << (V,#CCEEFF) ValueObject >> {
     +OpenTime: TimeOnly <<nn>>
     +CloseTime: TimeOnly <<nn>>
   }
+
+  enum UserRole <<Enum>> {
+    Admin
+    Customer
+    RestaurantOwner
+  }
+
+  enum OrderStatus <<Enum>> {
+    Submitted
+    Confirmed
+    Preparing
+    Delivered
+    Cancelled
+  }
 }
 
-enum UserRole {
-  ADMIN,
-  CUSTOMER
-  RESTAURANT_OWNER
-  GUEST
+' ===================== Auth / Security =====================
+
+package "Auth" as P_Auth #F3E8FF {
+
+  class UserAccount <<entity>> {
+    +Email: Email <<nn>>
+    +PasswordHash: string <<nn>>
+    +Role: UserRole <<nn>>
+    +IsEnabled: bool <<nn>>
+  }
 }
 
-package "Customers" as P_Customers #FFF5E6 {
+' ===================== Customer =====================
 
-    abstract class Customer {
-      +Role: UserRole <<nn>>
-    }
-    
-    class RegisterCustomer {
-      +FirstName: string <<nn>>
-      +LastName: string <<nn>>
-      +Email: Email <<nn>>
-      +Phone: Phone
-      +Address: Address <<nn>>
-      '+Addresses: List<Address> <<nn>>
-    }
-    
-    class AnonymousCustomer {
-    }
+package "Customer" as P_Customer #FFF5E6 {
+
+  abstract class Customer <<entity>> {
+  }
+
+  class RegisteredCustomer <<entity>> {
+    +FirstName: string <<nn>>
+    +LastName: string <<nn>>
+    +Email: Email <<nn>>
+    +Phone: Phone
+    +Address: Address <<nn>>
+  }
+
+  class AnonymousCustomer <<entity>> {
+    +LastSeenAt: DateTime <<nn>>
+  }
 }
 
-class RestaurantOwner {
-  Role: UserRole <<nn>>
-  CompanyName: string <<nn>>
-  CompanyAdress: Address <<nn>>
-  FirstName: string <<nn>>
-  LastName: string <<nn>>
-  Email : Email <<nn>>
+' ===================== Restaurant Owner =====================
+
+package "Restaurant Owner" as P_RestaurantOwner #E8F8F0 {
+
+  class RestaurantOwner <<entity>> {
+    +CompanyName: string <<nn>>
+    +CompanyAddress: Address <<nn>>
+    +VatId: string <<nn>>
+    +Phone: Phone <<nn>>
+    +Email: Email <<nn>>
+    +FirstName: string <<nn>>
+    +LastName: string <<nn>>
+  }
 }
 
-enum OrderStatus {
-  SUBMITTED
-  CONFIRMED
-  PREPARING
-  DELIVERED
-  CANCELLED
+' ===================== Restaurant =====================
+
+package "Restaurant" as P_Restaurant #F5E8F4 {
+
+  class Restaurant <<entity>> {
+    +Name: string <<nn>>
+    +Address: Address <<nn>>
+    +Phone: Phone <<nn>>
+    +OpeningHours: OpeningHours <<nn>>
+  }
+
+  class MenuItem <<entity>> {
+    +Name: string <<nn>>
+    +Description: string <<nn>>
+    +Price: decimal <<nn>>
+  }
 }
 
-class Order {
-  Customer: RegisterCustomer <<nn>>
-  Restaurant: Restaurant <<nn>>
-  OrderedAt: DateTime <<nn>>
-  OrderState: OrderState <<nn>>
+' ===================== Cart =====================
+
+package "Cart" as P_Cart #EAF8EA {
+
+  class Cart <<entity>> {
+    +Customer: Customer <<nn>>
+    +Restaurant: Restaurant <<nn>>
+    +CartItems: List<CartItem> <<nn>>
+  }
+
+  class CartItem <<entity>> {
+    +MenuItem: MenuItem <<nn>>
+    +Cart: Cart <<nn>>
+    +Quantity: int <<nn>>
+    +Comment: string
+  }
 }
 
-class OrderItem {
-  Order: Order <<nn>>
-  MenuItem: MenuItem <<nn>>
-  Quantity: int <<nn>>
-  Price: decimal <<nn>>
+' ===================== Order =====================
+
+package "Order" as P_Order #FFF0FF {
+
+  class Order <<entity>> {
+    +OrderedAt: DateTime <<nn>>
+    +Status: OrderStatus <<nn>>
+    +Customer: RegisteredCustomer <<nn>>
+    +Restaurant: Restaurant <<nn>>
+    +OrderItems: List<OrderItem> <<nn>>
+  }
+
+  class OrderItem <<entity>> {
+    +Order: Order <<nn>>
+    +MenuItem: MenuItem <<nn>>
+    +Quantity: int <<nn>>
+    +Price: decimal <<nn>>
+  }
 }
 
-class Restaurant {
-  Name: string <<nn>>
-  Address: Address <<nn>>
-  OpeningHours: OpeningHours <<nn>>
-  RestaurantOwner: RestaurantOwner <<nn>>
-}
+' ===================== Inheritance =====================
 
-class MenuItem {
-  Restaurant: Restaurant <<nn>>
-  Name: string <<nn>>
-  Price: decimal <<nn>>
-}
+Customer <|-- RegisteredCustomer
+Customer <|-- AnonymousCustomer
 
-class Cart {
-   Customer: Customer <<nn>>
-   Restaurant: Restaurant <<nn>>
-   CartItems: List<CartItem> <<nn>>
-}
+' ===================== Relationships =====================
 
-class CartItem {
-   Cart: Cart <<nn>>
-   MenuItem: MenuItem <<nn>>
-   Quantity: int <<nn>>
-}
-
-
-'Beziehungen
-
-
-' ===================== Beziehungen =====================
-
-RegisterCustomer --|> Customer
-AnonymousCustomer --|> Customer
-
-Order "*" --> "1" RegisterCustomer
-Order "*" --> "1" Restaurant
-Order "1" <-- "*" OrderItem
-
-OrderItem "*" --> "1" MenuItem
+RegisteredCustomer "1" --> "1" UserAccount
+RestaurantOwner "1" --> "1" UserAccount
 
 Restaurant "1" <-- "*" MenuItem
 Restaurant "*" --> "1" RestaurantOwner
 
-Cart "0..1" -- "1" Customer
+Cart "*" --> "1" Customer
 Cart "*" --> "1" Restaurant
 Cart "1" <-- "*" CartItem
-
 CartItem "*" --> "1" MenuItem
+
+Order "1" <-- "*" OrderItem
+Order "1" --> "1" RegisteredCustomer
+Order "1" --> "1" Restaurant
+
+
+note right of UserAccount
+Auth concern, not business concern.
+
+Used for login and access control.
+
+RegisteredCustomer and RestaurantOwner
+have a UserAccount.
+AnonymousCustomer does not.
+end note
+
+note right of AnonymousCustomer
+Business concern, not auth concern.
+
+Temporary customer while browsing
+before registration.
+
+Current: ordering requires registration.
+Future: guest checkout possible.
+end note
 
 @enduml
